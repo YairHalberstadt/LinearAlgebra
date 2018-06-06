@@ -9,11 +9,20 @@ namespace Vectors.GenericImplementations
 {
     public class ImmutableDenseVector<TDataType, TOperatorDefiner> : IVector<TDataType, TOperatorDefiner> where TOperatorDefiner : IRingOperationDefiner<TDataType>, new()
     {
-        private TDataType[] _items;
+        private readonly TDataType[] _items;
 
         public ImmutableDenseVector(IEnumerable<TDataType> items)
         {
             _items = items.ToArray();
+        }
+
+        /// <summary>
+        /// When we know TDataType[] is immutable, used to reduce the overhead of creating a new vector.
+        /// </summary>
+        /// <param name="items"></param>
+        private ImmutableDenseVector(TDataType[] items)
+        {
+            _items = items;
         }
 
         public TDataType this[int index] => _items[index];
@@ -24,16 +33,25 @@ namespace Vectors.GenericImplementations
         {
             if (addend.Length != Length)
                 throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
+
             var result = new TDataType[Length];
             var opDef = new TOperatorDefiner();
+
             for (int i = 0; i < Length; i++)
                 result[i] = opDef.Add(this[i], addend[i]);
+
             return new ImmutableDenseVector<TDataType, TOperatorDefiner>(result);
         }
 
         public IVector<TDataType, TOperatorDefiner> AdditiveIdentity()
         {
-            throw new NotImplementedException();
+            var result = new TDataType[Length];
+            var zero = new TOperatorDefiner().Zero;
+
+            for (int i = 0; i < Length; i++)
+                result[i] = zero;
+
+            return new ImmutableDenseVector<TDataType, TOperatorDefiner>(result);
         }
 
         public IEnumerator<TDataType> GetEnumerator()
@@ -42,6 +60,11 @@ namespace Vectors.GenericImplementations
         }
 
         public TDataType InnerProduct()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IVector<TDataType, TOperatorDefiner> Slice(int @from = 0, int to = 0)
         {
             throw new NotImplementedException();
         }

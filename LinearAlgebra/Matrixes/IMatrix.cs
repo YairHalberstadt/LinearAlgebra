@@ -18,6 +18,8 @@ namespace Matrixes
 
         IRowVector<TDataType, TOperationDefiner> this[int index] { get; set; }
 
+        TDataType this[int rowIndex, int columnIndex] { get; set; }
+
         IMatrix<TDataType, TOperationDefiner> Scale(TDataType scalar);
 
         IMatrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend);
