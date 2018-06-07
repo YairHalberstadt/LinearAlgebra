@@ -1,6 +1,6 @@
 ﻿namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperationsDefiners
 {
-    abstract class RuntimeOperationDefiner<T> : IOperationDefiner<T>
+    public abstract class RuntimeOperationDefiner<T> : IOperationDefiner<T>
     {
     }
 }

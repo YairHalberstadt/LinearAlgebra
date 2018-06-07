@@ -13,7 +13,7 @@ namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperation
     /// This is neccessary if one want to use any vector/matrix implementation, as there is no way to tell them which Operations to use.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    class RuntimeRingOperationDefiner<T> : RuntimeOperationDefiner<T>, IRingOperationDefiner<T>
+    public class RuntimeRingOperationDefiner<T> : RuntimeOperationDefiner<T>, IRingOperationDefiner<T>
     {
         public static RingOperationsDefinition<T> Operations { get; private set; }
 
