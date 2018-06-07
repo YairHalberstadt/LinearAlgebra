@@ -7,7 +7,7 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Vectors.GenericImplementations
 {
-    public class ImmutableDenseVector<TDataType, TOperatorDefiner> : IVector<TDataType, TOperatorDefiner> where TOperatorDefiner : IRingOperationDefiner<TDataType>, new()
+    public class ImmutableDenseVector<TDataType, TOperationDefiner> : Vector<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
     {
         private readonly TDataType[] _items;
 
@@ -25,61 +25,102 @@ namespace Vectors.GenericImplementations
             _items = items;
         }
 
-        public TDataType this[int index] => _items[index];
+        public override TDataType this[int index] => _items[index];
 
-        public int Length => _items.Length;
+        public override int Length => _items.Length;
 
-        public IVector<TDataType, TOperatorDefiner> Add(IVector<TDataType, TOperatorDefiner> addend)
+        public override Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
         {
-            if (addend.Length != Length)
+	        var length = Length;
+            if (addend.Length != length)
                 throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
-            var result = new TDataType[Length];
-            var opDef = new TOperatorDefiner();
+            var result = new TDataType[length];
+            var opDef = new TOperationDefiner();
+            
+            for (int i = 0; i < length; i++)
+                result[i] = opDef.Add(_items[i], addend[i]);
 
-            for (int i = 0; i < Length; i++)
-                result[i] = opDef.Add(this[i], addend[i]);
-
-            return new ImmutableDenseVector<TDataType, TOperatorDefiner>(result);
+            return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
 
-        public IVector<TDataType, TOperatorDefiner> AdditiveIdentity()
+        public override Vector<TDataType, TOperationDefiner> AdditiveIdentity()
         {
             var result = new TDataType[Length];
-            var zero = new TOperatorDefiner().Zero;
+            var zero = new TOperationDefiner().Zero;
+	        var length = Length;
 
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < length; i++)
                 result[i] = zero;
 
-            return new ImmutableDenseVector<TDataType, TOperatorDefiner>(result);
+            return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
 
-        public IEnumerator<TDataType> GetEnumerator()
+        public override IEnumerator<TDataType> GetEnumerator()
+        {
+	        var length = Length;
+
+	        for (int i = 0; i < length; i++)
+		        yield return _items[i];
+        }
+
+        public override TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand)
+        {
+	        var length = Length;
+	        if (operand.Length != length)
+		        throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
+
+	        var opDef = new TOperationDefiner();
+	        var result = opDef.Zero;
+
+	        for (int i = 0; i < length; i++)
+		        result = opDef.Add(result, opDef.Multiply(_items[i], operand[i]));
+
+            return result;
+        }
+
+        public override Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0)
+        {
+            var length = Length;
+            if (from < 0)
+                from = length + from;
+            if (to <= 0)
+                to = length + to;
+	        if (from >= length  || to > length)
+		        throw new ArgumentOutOfRangeException(
+			        "the absolute values of the parameters must be less than the Length of the vector");
+
+            TDataType[] result;
+	        if (from < to)
+	        {
+		        result = new TDataType[to - from];
+		        for (int i = from; i < to; i++)
+		        {
+			        result[i] = _items[i];
+		        }
+	        }
+	        else
+	        {
+		        result = new TDataType[length - from + to];
+		        for (int i = from; i < length; i++)
+		        {
+			        result[i] = _items[i];
+		        }
+		        for (int i = 0; i < to; i++)
+		        {
+			        result[i] = _items[i];
+		        }
+            }
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
+        }
+
+        public override Vector<TDataType, TOperationDefiner> Negative()
         {
             throw new NotImplementedException();
         }
 
-        public TDataType InnerProduct()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IVector<TDataType, TOperatorDefiner> Slice(int @from = 0, int to = 0)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IVector<TDataType, TOperatorDefiner> Negative()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IVector<TDataType, TOperatorDefiner> Scale(TDataType scalar)
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
+        public override Vector<TDataType, TOperationDefiner> Scale(TDataType scalar)
         {
             throw new NotImplementedException();
         }

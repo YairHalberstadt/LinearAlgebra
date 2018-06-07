@@ -48,6 +48,14 @@ namespace Vectors
             return hash;
         }
 
+	    public static Vector<TDataType, TOperationDefiner> operator +(Vector<TDataType, TOperationDefiner> first,
+		    IVector<TDataType, TOperationDefiner> second) => first.Add(second);
+
+	    public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> first,
+		    IVector<TDataType, TOperationDefiner> second) => first.Add(second.Negative());
+
+	    public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> operand) => operand.Negative();
+
         public abstract Vector<TDataType, TOperationDefiner> Scale(TDataType scalar);
 
         public abstract Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend);
@@ -56,19 +64,11 @@ namespace Vectors
 
         public abstract Vector<TDataType, TOperationDefiner> AdditiveIdentity();
 
-        public abstract TDataType InnerProduct();
+        public abstract TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
 
         public abstract IEnumerator<TDataType> GetEnumerator();
 
-        public abstract Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = 0);
-
-        public static Vector<TDataType, TOperationDefiner> operator +(Vector<TDataType, TOperationDefiner> first,
-            IVector<TDataType, TOperationDefiner> second) => first.Add(second);
-
-        public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> first,
-            IVector<TDataType, TOperationDefiner> second) => first.Add(second.Negative());
-
-        public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> operand) => operand.Negative();
+        public abstract Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

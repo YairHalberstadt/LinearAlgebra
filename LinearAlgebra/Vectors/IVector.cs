@@ -21,7 +21,7 @@ namespace Vectors
 
         IVector<TDataType, TOperationDefiner> AdditiveIdentity();
 
-        TDataType InnerProduct();
+        TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
 
         /// <summary>
         /// Gets the vector starting at from, up to and not including to, looping the vector if neccessary.
@@ -36,6 +36,6 @@ namespace Vectors
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        IVector<TDataType, TOperationDefiner> Slice(int from = 0, int to = 0);
+        IVector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0);
     }
 }
