@@ -117,12 +117,38 @@ namespace Vectors.GenericImplementations
 
         public override Vector<TDataType, TOperationDefiner> Negative()
         {
-            throw new NotImplementedException();
+	        var result = new TDataType[Length];
+	        var length = Length;
+	        var opDef = new TOperationDefiner();
+
+	        for (int i = 0; i < length; i++)
+		        result[i] = opDef.Negative(_items[i]);
+
+	        return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
 
-        public override Vector<TDataType, TOperationDefiner> Scale(TDataType scalar)
+        public override Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
         {
-            throw new NotImplementedException();
+	        var result = new TDataType[Length];
+	        var length = Length;
+	        var opDef = new TOperationDefiner();
+
+	        for (int i = 0; i < length; i++)
+		        result[i] = opDef.Multiply(scalar,_items[i]);
+
+	        return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
+
+	    public override Vector<TDataType, TOperationDefiner> RightScale(TDataType scalar)
+	    {
+		    var result = new TDataType[Length];
+		    var length = Length;
+		    var opDef = new TOperationDefiner();
+
+		    for (int i = 0; i < length; i++)
+			    result[i] = opDef.Multiply(_items[i], scalar);
+
+		    return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
+	    }
     }
 }

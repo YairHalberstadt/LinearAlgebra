@@ -13,7 +13,9 @@ namespace Vectors
 
         bool Equals(IVector<TDataType, TOperationDefiner> equand);
 
-        IVector<TDataType, TOperationDefiner> Scale(TDataType scalar);
+        IVector<TDataType, TOperationDefiner> LeftScale(TDataType scalar);
+
+	    IVector<TDataType, TOperationDefiner> RightScale(TDataType scalar);
 
         IVector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend);
 

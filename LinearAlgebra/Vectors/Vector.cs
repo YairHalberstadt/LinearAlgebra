@@ -56,7 +56,9 @@ namespace Vectors
 
 	    public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> operand) => operand.Negative();
 
-        public abstract Vector<TDataType, TOperationDefiner> Scale(TDataType scalar);
+        public abstract Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar);
+
+	    public abstract Vector<TDataType, TOperationDefiner> RightScale(TDataType scalar);
 
         public abstract Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend);
 
@@ -72,7 +74,9 @@ namespace Vectors
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Scale(TDataType scalar) => Scale(scalar);
+        IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.LeftScale(TDataType scalar) => LeftScale(scalar);
+
+	    IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.RightScale(TDataType scalar) => RightScale(scalar);
 
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Add(IVector<TDataType, TOperationDefiner> addend) => Add(addend);
 
