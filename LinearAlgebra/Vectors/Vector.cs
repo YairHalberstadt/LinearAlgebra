@@ -20,6 +20,9 @@ namespace Vectors
 
             var length = Length;
 
+            if (equand.Length != length)
+                return false;
+
             for (int i = 0; i < length; i++)
             {
                 if (!opDef.Equals(this[i], equand[i]))

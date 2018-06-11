@@ -27,8 +27,7 @@ namespace Tests.Unit.VectorTests
 		[Test]
 	    public void RunIVectorTest()
 		{
-			IVectorTests.TestLength(_vectors);
-            IVectorTests.TestAddition(_vectors);
+			IVectorTests.RunIVectorTestSuite(_vectors);
         }
     }
 }
