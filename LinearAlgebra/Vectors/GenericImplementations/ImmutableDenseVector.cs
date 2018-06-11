@@ -11,9 +11,8 @@ namespace Vectors.GenericImplementations
     {
         private readonly TDataType[] _items;
 
-        public ImmutableDenseVector(IEnumerable<TDataType> items)
+        public ImmutableDenseVector(IEnumerable<TDataType> items) : this(items.ToArray())
         {
-            _items = items.ToArray();
         }
 
         /// <summary>
@@ -23,22 +22,22 @@ namespace Vectors.GenericImplementations
         private ImmutableDenseVector(TDataType[] items)
         {
             _items = items;
+	        Length = _items.Length;
         }
 
         public override TDataType this[int index] => _items[index];
 
-        public override int Length => _items.Length;
+	    public override int Length { get; }
 
         public override Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
         {
-	        var length = Length;
-            if (addend.Length != length)
+            if (addend.Length != Length)
                 throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
-            var result = new TDataType[length];
+            var result = new TDataType[Length];
             var opDef = new TOperationDefiner();
             
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < Length; i++)
                 result[i] = opDef.Add(_items[i], addend[i]);
 
             return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
@@ -48,9 +47,8 @@ namespace Vectors.GenericImplementations
         {
             var result = new TDataType[Length];
             var zero = new TOperationDefiner().Zero;
-	        var length = Length;
 
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < Length; i++)
                 result[i] = zero;
 
             return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
@@ -58,22 +56,19 @@ namespace Vectors.GenericImplementations
 
         public override IEnumerator<TDataType> GetEnumerator()
         {
-	        var length = Length;
-
-	        for (int i = 0; i < length; i++)
+	        for (int i = 0; i < Length; i++)
 		        yield return _items[i];
         }
 
         public override TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand)
         {
-	        var length = Length;
-	        if (operand.Length != length)
+	        if (operand.Length != Length)
 		        throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
 	        var opDef = new TOperationDefiner();
 	        var result = opDef.Zero;
 
-	        for (int i = 0; i < length; i++)
+	        for (int i = 0; i < Length; i++)
 		        result = opDef.Add(result, opDef.Multiply(_items[i], operand[i]));
 
             return result;
@@ -81,14 +76,13 @@ namespace Vectors.GenericImplementations
 
         public override Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0)
         {
-            var length = Length;
+            from %= Length;
             if (from < 0)
-                from = length + from;
-            if (to <= 0)
-                to = length + to;
-	        if (from >= length  || to > length)
-		        throw new ArgumentOutOfRangeException(
-			        "the absolute values of the parameters must be less than the Length of the vector");
+                from += Length;
+
+            to %= Length;
+	        if (to < 0)
+		        to += Length;
 
             TDataType[] result;
 	        if (from < to)
@@ -101,8 +95,8 @@ namespace Vectors.GenericImplementations
 	        }
 	        else
 	        {
-		        result = new TDataType[length - from + to];
-		        for (int i = from; i < length; i++)
+		        result = new TDataType[Length - from + to];
+		        for (int i = from; i < Length; i++)
 		        {
 			        result[i] = _items[i];
 		        }

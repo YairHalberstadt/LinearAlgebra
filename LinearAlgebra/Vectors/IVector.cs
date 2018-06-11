@@ -28,7 +28,8 @@ namespace Vectors
         /// <summary>
         /// Gets the vector starting at from, up to and not including to, looping the vector if neccessary.
         /// Zero based index used.
-        /// Negative indices refer to elements before the end of the vector.
+        /// Indices are calculated modulo the length of the vector, meaning negative indices refer to elements before the end of the vector.
+        /// Note that therefore even values greater than the length of the vector are accepted.
         /// Eg:
         /// Slice(0, 0) will return the original vector
         /// Slice(4, 8) will return the 5th, 6th, 7th 8th items.
