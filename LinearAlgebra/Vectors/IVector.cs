@@ -21,6 +21,8 @@ namespace Vectors
 
         IVector<TDataType, TOperationDefiner> Negative();
 
+	    IVector<TDataType, TOperationDefiner> Subtract(IVector<TDataType, TOperationDefiner> subtrand);
+
         IVector<TDataType, TOperationDefiner> AdditiveIdentity();
 
         TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);

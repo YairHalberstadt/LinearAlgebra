@@ -67,6 +67,8 @@ namespace Vectors
 
         public abstract Vector<TDataType, TOperationDefiner> Negative();
 
+	    public virtual Vector<TDataType, TOperationDefiner> Subtract(IVector<TDataType, TOperationDefiner> subtrand) => Add(subtrand.Negative());
+
         public abstract Vector<TDataType, TOperationDefiner> AdditiveIdentity();
 
         public abstract TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
@@ -84,6 +86,8 @@ namespace Vectors
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Add(IVector<TDataType, TOperationDefiner> addend) => Add(addend);
 
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Negative() => Negative();
+
+	    IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Subtract(IVector<TDataType, TOperationDefiner> subtrand) => Subtract(subtrand);
 
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.AdditiveIdentity() => AdditiveIdentity();
 
