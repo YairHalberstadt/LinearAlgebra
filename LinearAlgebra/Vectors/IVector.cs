@@ -25,6 +25,10 @@ namespace Vectors
 
         IVector<TDataType, TOperationDefiner> AdditiveIdentity();
 
+	    IVector<TDataType, TOperationDefiner> Apply(Func<TDataType,TDataType> func);
+
+	    IVector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector);
+
         TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
 
         /// <summary>

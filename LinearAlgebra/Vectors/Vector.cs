@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
@@ -51,11 +52,16 @@ namespace Vectors
             return hash;
         }
 
+	    public static bool operator ==(Vector<TDataType, TOperationDefiner> first,
+		    IVector<TDataType, TOperationDefiner> second) => first?.Equals(second) ?? second is null;
+
+	    public static bool operator !=(Vector<TDataType, TOperationDefiner> first, IVector<TDataType, TOperationDefiner> second) => !(first == second);
+
 	    public static Vector<TDataType, TOperationDefiner> operator +(Vector<TDataType, TOperationDefiner> first,
 		    IVector<TDataType, TOperationDefiner> second) => first.Add(second);
 
 	    public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> first,
-		    IVector<TDataType, TOperationDefiner> second) => first.Add(second.Negative());
+		    IVector<TDataType, TOperationDefiner> second) => first.Subtract(second);
 
 	    public static Vector<TDataType, TOperationDefiner> operator -(Vector<TDataType, TOperationDefiner> operand) => operand.Negative();
 
@@ -71,7 +77,11 @@ namespace Vectors
 
         public abstract Vector<TDataType, TOperationDefiner> AdditiveIdentity();
 
-        public abstract TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
+	    public abstract Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func);
+
+	    public abstract Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector);
+
+	    public abstract TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand);
 
         public abstract IEnumerator<TDataType> GetEnumerator();
 
@@ -90,6 +100,10 @@ namespace Vectors
 	    IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Subtract(IVector<TDataType, TOperationDefiner> subtrand) => Subtract(subtrand);
 
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.AdditiveIdentity() => AdditiveIdentity();
+
+	    IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Apply(Func<TDataType, TDataType> func) => Apply(func);
+
+	    IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector) => Apply(func, vector);
 
         IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Slice(int from, int to) => Slice(@from, to);
     }

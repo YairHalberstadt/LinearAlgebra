@@ -16,5 +16,7 @@ namespace Types
 	    public int Negative(int operand) => -operand;
 
 	    public int One => 1;
+
+        public int Subtract(int first, int second) => first - second;
     }
 }

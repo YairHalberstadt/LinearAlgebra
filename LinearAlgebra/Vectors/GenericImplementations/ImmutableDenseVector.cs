@@ -11,6 +11,8 @@ namespace Vectors.GenericImplementations
     {
         private readonly TDataType[] _items;
 
+	    private readonly TOperationDefiner _opDef = new TOperationDefiner();
+
         public ImmutableDenseVector(IEnumerable<TDataType> items) : this(items.ToArray())
         {
         }
@@ -35,10 +37,9 @@ namespace Vectors.GenericImplementations
                 throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
             var result = new TDataType[Length];
-            var opDef = new TOperationDefiner();
             
             for (int i = 0; i < Length; i++)
-                result[i] = opDef.Add(_items[i], addend[i]);
+                result[i] = _opDef.Add(_items[i], addend[i]);
 
             return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
@@ -46,7 +47,7 @@ namespace Vectors.GenericImplementations
         public override Vector<TDataType, TOperationDefiner> AdditiveIdentity()
         {
             var result = new TDataType[Length];
-            var zero = new TOperationDefiner().Zero;
+            var zero = _opDef.Zero;
 
             for (int i = 0; i < Length; i++)
                 result[i] = zero;
@@ -54,7 +55,30 @@ namespace Vectors.GenericImplementations
             return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
 
-        public override IEnumerator<TDataType> GetEnumerator()
+	    public override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func)
+	    {
+		    var result = new TDataType[Length];
+
+		    for (int i = 0; i < Length; i++)
+			    result[i] = func(_items[i]);
+
+		    return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
+        }
+
+	    public override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector)
+	    {
+		    if (vector.Length != Length)
+			    throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
+
+            var result = new TDataType[Length];
+
+		    for (int i = 0; i < Length; i++)
+			    result[i] = func(_items[i], vector[i]);
+
+		    return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
+        }
+
+	    public override IEnumerator<TDataType> GetEnumerator()
         {
 	        for (int i = 0; i < Length; i++)
 		        yield return _items[i];
@@ -65,17 +89,19 @@ namespace Vectors.GenericImplementations
 	        if (operand.Length != Length)
 		        throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
-	        var opDef = new TOperationDefiner();
-	        var result = opDef.Zero;
+	        var result = _opDef.Zero;
 
 	        for (int i = 0; i < Length; i++)
-		        result = opDef.Add(result, opDef.Multiply(_items[i], operand[i]));
+		        result = _opDef.Add(result, _opDef.Multiply(_items[i], operand[i]));
 
             return result;
         }
 
         public override Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0)
         {
+            if (Length == 0)
+                return this;
+
             from %= Length;
             if (from < 0)
                 from += Length;
@@ -88,21 +114,22 @@ namespace Vectors.GenericImplementations
 	        if (from < to)
 	        {
 		        result = new TDataType[to - from];
-		        for (int i = from; i < to; i++)
+		        for (int i = from, j = 0; i < to; i++, j++)
 		        {
-			        result[i] = _items[i];
+			        result[j] = _items[i];
 		        }
 	        }
 	        else
 	        {
 		        result = new TDataType[Length - from + to];
-		        for (int i = from; i < Length; i++)
+		        int j = 0;
+		        for (int i = from; i < Length; i++, j++)
 		        {
-			        result[i] = _items[i];
+			        result[j] = _items[i];
 		        }
-		        for (int i = 0; i < to; i++)
+		        for (int i = 0; i < to; i++, j++)
 		        {
-			        result[i] = _items[i];
+			        result[j] = _items[i];
 		        }
             }
 
@@ -112,11 +139,9 @@ namespace Vectors.GenericImplementations
         public override Vector<TDataType, TOperationDefiner> Negative()
         {
 	        var result = new TDataType[Length];
-	        var length = Length;
-	        var opDef = new TOperationDefiner();
 
-	        for (int i = 0; i < length; i++)
-		        result[i] = opDef.Negative(_items[i]);
+	        for (int i = 0; i < Length; i++)
+		        result[i] = _opDef.Negative(_items[i]);
 
 	        return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
@@ -124,11 +149,9 @@ namespace Vectors.GenericImplementations
         public override Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
         {
 	        var result = new TDataType[Length];
-	        var length = Length;
-	        var opDef = new TOperationDefiner();
 
-	        for (int i = 0; i < length; i++)
-		        result[i] = opDef.Multiply(scalar,_items[i]);
+	        for (int i = 0; i < Length; i++)
+		        result[i] = _opDef.Multiply(scalar,_items[i]);
 
 	        return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
@@ -136,11 +159,9 @@ namespace Vectors.GenericImplementations
 	    public override Vector<TDataType, TOperationDefiner> RightScale(TDataType scalar)
 	    {
 		    var result = new TDataType[Length];
-		    var length = Length;
-		    var opDef = new TOperationDefiner();
 
-		    for (int i = 0; i < length; i++)
-			    result[i] = opDef.Multiply(_items[i], scalar);
+		    for (int i = 0; i < Length; i++)
+			    result[i] = _opDef.Multiply(_items[i], scalar);
 
 		    return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
 	    }
