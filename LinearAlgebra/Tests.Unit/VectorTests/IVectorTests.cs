@@ -232,7 +232,35 @@ namespace Tests.Unit.VectorTests
 			}
 		}
 
-		public static void RunIVectorTestSuite<S, T>(IEnumerable<IVector<S, T>> vectors)
+		public static void TestApplyOnOneVectors<S, T>(IEnumerable<IVector<S, T>> vectors)
+			where T : IRingOperationDefiner<S>, new()
+		{
+			var opDef = new T();
+			var zero = opDef.Zero;
+
+			foreach (var vector in vectors)
+			{
+				if (vector.Length == 0)
+				{
+					Assert.True(
+						vector.Apply(x => zero)
+							.AreEqual(vector, opDef
+							)
+					);
+                    continue;
+				}
+
+				var scalar = vector.First();
+				Assert.True(
+					vector.Apply(x => opDef.Multiply(scalar, x))
+						.AreEqual(
+							vector.LeftScale(scalar)
+							, opDef)
+				);
+			}
+		}
+
+        public static void RunIVectorTestSuite<S, T>(IEnumerable<IVector<S, T>> vectors)
 			where T : IRingOperationDefiner<S>, new()
 		{
 			vectors = vectors.ToList();
@@ -248,6 +276,8 @@ namespace Tests.Unit.VectorTests
 			TestInnerProduct(vectors);
 			TestSlice(vectors);
 			TestApplyOnTwoVectors(vectors);
+			TestApplyOnOneVectors(vectors);
+
 
 		}
 
