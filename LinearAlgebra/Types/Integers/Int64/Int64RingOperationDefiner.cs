@@ -4,7 +4,7 @@ namespace Types.Integers.Int64
 {
     public class Int64RingOperationDefiner : IRingOperationDefiner<long>
     {
-        public bool Equals(long first, long second, double TOLERANCE) => first == second;
+        public bool Equals(long first, long second) => first == second;
 
         public long Add(long first, long second) => first + second;
 

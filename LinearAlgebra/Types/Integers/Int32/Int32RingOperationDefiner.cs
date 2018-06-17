@@ -4,7 +4,7 @@ namespace Types.Integers.Int32
 {
     public class Int32RingOperationDefiner : IRingOperationDefiner<int>
     {
-        public bool Equals(int first, int second, double TOLERANCE) => first == second;
+        public bool Equals(int first, int second) => first == second;
 
         public int Add(int first, int second) => first + second;
 

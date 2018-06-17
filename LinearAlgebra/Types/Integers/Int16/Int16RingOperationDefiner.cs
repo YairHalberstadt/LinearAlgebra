@@ -4,7 +4,7 @@ namespace Types.Integers.Int16
 {
     public class Int16RingOperationDefiner : IRingOperationDefiner<short>
     {
-        public bool Equals(short first, short second, double TOLERANCE) => first == second;
+        public bool Equals(short first, short second) => first == second;
 
         public short Add(short first, short second) => (short) (first + second);
 

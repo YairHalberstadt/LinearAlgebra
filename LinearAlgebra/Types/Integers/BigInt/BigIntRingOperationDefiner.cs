@@ -5,7 +5,7 @@ namespace Types.Integers.BigInt
 {
     public class BigIntRingOperationDefiner : IRingOperationDefiner<BigInteger>
     {
-        public bool Equals(BigInteger first, BigInteger second, double TOLERANCE) => first == second;
+        public bool Equals(BigInteger first, BigInteger second) => first == second;
 
         public BigInteger Add(BigInteger first, BigInteger second) => first + second;
 

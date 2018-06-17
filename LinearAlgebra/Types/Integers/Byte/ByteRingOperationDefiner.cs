@@ -4,7 +4,7 @@ namespace Types.Integers.Byte
 {
     public class ByteRingOperationDefiner : IRingOperationDefiner<byte>
     {
-        public bool Equals(byte first, byte second, double TOLERANCE) => first == second;
+        public bool Equals(byte first, byte second) => first == second;
 
         public byte Add(byte first, byte second) => (byte) (first + second);
 

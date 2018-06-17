@@ -7,7 +7,7 @@ namespace Types.Floats.Float
     {
         public const double TOLERANCE = 0.0001;
 
-        public bool Equals(float first, float second, double tolerance) => Math.Abs(first - second) < TOLERANCE;
+        public bool Equals(float first, float second) => Math.Abs(first - second) < TOLERANCE;
 
         public float Add(float first, float second) => first + second;
 

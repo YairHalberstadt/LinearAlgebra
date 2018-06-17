@@ -4,7 +4,7 @@ namespace Types.Floats.Decimal
 {
     public class DecimalRingOperationDefiner : IRingOperationDefiner<decimal>
     {
-        public bool Equals(decimal first, decimal second, double TOLERANCE) => first == second;
+        public bool Equals(decimal first, decimal second) => first == second;
 
         public decimal Add(decimal first, decimal second) => first + second;
 
