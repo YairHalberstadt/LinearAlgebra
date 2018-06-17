@@ -1,11 +1,10 @@
-﻿using System;
-using OperationDefiners.CoreOperationDefinerInterfaces;
+﻿using OperationDefiners.CoreOperationDefinerInterfaces;
 
-namespace Types
+namespace Types.Integers.Int32
 {
-    public class IntRingOperationDefiner : IRingOperationDefiner<int>
+    public class Int32RingOperationDefiner : IRingOperationDefiner<int>
     {
-        public bool Equals(int first, int second) => first == second;
+        public bool Equals(int first, int second, double TOLERANCE) => first == second;
 
         public int Add(int first, int second) => first + second;
 
