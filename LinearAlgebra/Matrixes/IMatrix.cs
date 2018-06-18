@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes
 {
-    public interface IMatrix<TDataType, TOperationDefiner> : IEnumerable<IRowVector<TDataType, TOperationDefiner>>,
-        IEnumerable<IColumnVector<TDataType, TOperationDefiner>>,
-        IEnumerable<TDataType> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
+    public interface IMatrix<TDataType, TOperationDefiner>  where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
     {
         int RowCount { get; }
 
@@ -33,3 +32,4 @@ namespace Matrixes
         bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
     }
 }
+
