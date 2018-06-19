@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
+[assembly: InternalsVisibleTo("Matrixes")]
 namespace Vectors.GenericImplementations
 {
     public class ImmutableDenseVector<TDataType, TOperationDefiner> : Vector<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
@@ -21,7 +23,7 @@ namespace Vectors.GenericImplementations
         /// When we know TDataType[] is immutable, used to reduce the overhead of creating a new vector.
         /// </summary>
         /// <param name="items"></param>
-        private ImmutableDenseVector(TDataType[] items)
+        internal ImmutableDenseVector(TDataType[] items)
         {
             _items = items;
 	        Length = _items.Length;

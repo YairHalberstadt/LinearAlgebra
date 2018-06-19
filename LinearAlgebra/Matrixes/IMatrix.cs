@@ -15,9 +15,9 @@ namespace Matrixes
 
         IEnumerable<IColumnVector<TDataType, TOperationDefiner>> Columns { get; }
 
-        IRowVector<TDataType, TOperationDefiner> this[int index] { get; set; }
+        IRowVector<TDataType, TOperationDefiner> this[int index] { get;}
 
-        TDataType this[int rowIndex, int columnIndex] { get; set; }
+        TDataType this[int rowIndex, int columnIndex] { get;}
 
         IMatrix<TDataType, TOperationDefiner> Scale(TDataType scalar);
 
