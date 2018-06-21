@@ -4,7 +4,7 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 using Vectors;
 using Vectors.GenericImplementations;
 
-namespace Matrixes
+namespace Matrixes.GenericImplementations
 {
 	public class ImmutableDenseRowVector<TDataType, TOperationDefiner> : RowVector<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{

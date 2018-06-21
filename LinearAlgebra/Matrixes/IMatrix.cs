@@ -11,6 +11,8 @@ namespace Matrixes
 
         int ColumnCount { get; }
 
+		int ItemCount { get; }
+
         IEnumerable<IRowVector<TDataType, TOperationDefiner>> Rows { get; }
 
         IEnumerable<IColumnVector<TDataType, TOperationDefiner>> Columns { get; }
@@ -19,9 +21,11 @@ namespace Matrixes
 
         TDataType this[int rowIndex, int columnIndex] { get;}
 
-        IMatrix<TDataType, TOperationDefiner> Scale(TDataType scalar);
+        IMatrix<TDataType, TOperationDefiner> LeftScale(TDataType scalar);
 
-        IMatrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend);
+	    IMatrix<TDataType, TOperationDefiner> RightScale(TDataType scalar);
+
+		IMatrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend);
 
         IMatrix<TDataType, TOperationDefiner> Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
 
@@ -30,6 +34,8 @@ namespace Matrixes
         IMatrix<TDataType, TOperationDefiner> AdditiveIdentity();
 
         bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
-    }
+
+	    bool SameSize(IMatrix<TDataType, TOperationDefiner> addend);
+	}
 }
 

@@ -3,7 +3,14 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Types.Floats.Float
 {
-    public class FloatRingOperationDefiner : IRingOperationDefiner<float>
+	/// <summary>
+	/// Due to the difficulty of floating point comparison, it is impossible to make a float a group
+	/// this is because no matter the implementation of == it is either possible that ((a + b) + c) != (a + (b + c))
+	/// or it is possible that a == b, b == c, c != a.
+	/// Hence although this implementation of IRingOperationDefiner&lt;float&gt; is provided,
+	/// we reccommend you use the DecimalRingOperationDefiner instead.
+	/// </summary>
+	public class FloatRingOperationDefiner : IRingOperationDefiner<float>
     {
         public const double TOLERANCE = 0.0001;
 
