@@ -6,7 +6,7 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes.GenericImplementations
 {
-	class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>
+	class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>, IInternalMatrix<TDataType, TOperationDefiner>
 		where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly TDataType[] _items;
@@ -78,6 +78,16 @@ namespace Matrixes.GenericImplementations
 
 					yield return new ImmutableDenseColumnVector<TDataType, TOperationDefiner>(array);
 				}
+			}
+		}
+
+		public override TDataType[] GetItems
+		{
+			get
+			{
+				var items = new TDataType[ItemCount];
+				_items.CopyTo(items, 0);
+				return items;
 			}
 		}
 
@@ -153,8 +163,8 @@ namespace Matrixes.GenericImplementations
 
 		public sealed override Matrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend)
 		{
-			if (addend is ImmutableDenseMatrix<TDataType, TOperationDefiner> imAddend)
-				return Add(imAddend);
+			if (addend is IInternalMatrix<TDataType, TOperationDefiner> intAddend)
+				return Add(intAddend);
 
 			if (!SameSize(addend))
 				throw new ArgumentOutOfRangeException(nameof(addend),
@@ -173,47 +183,54 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
 		}
 
-		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Add(ImmutableDenseMatrix<TDataType, TOperationDefiner> addend)
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Add(IInternalMatrix<TDataType, TOperationDefiner> addend)
 		{
 			if (!SameSize(addend))
 				throw new ArgumentOutOfRangeException(nameof(addend),
 					(addend), "Addend must be same size as the matrix");
 
+			var items = addend.Items; 
 			var itemCount = ItemCount;
 			var array = new TDataType[itemCount];
 			for (int i = 0; i < itemCount; i++)
-				array[i] = _opDef.Add(_items[i], addend._items[i]);
+				array[i] = _opDef.Add(_items[i], items[i]);
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
 		}
 
 		public override Matrix<TDataType, TOperationDefiner> Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand)
 		{
-			if (multiplicand is ImmutableDenseMatrix<TDataType, TOperationDefiner> imMultiplicand)
-				return Multiply(imMultiplicand);
-		}
-
-		public override ImmutableDenseMatrix<TDataType, TOperationDefiner> Multiply(ImmutableDenseMatrix<TDataType, TOperationDefiner> multiplicand)
-		{
 			if (!CanMultiply(multiplicand))
 				throw new ArgumentOutOfRangeException(nameof(multiplicand),
 					(multiplicand), "Multiplicand must have the same number of rows as the matrix has columns");
 
-			var itemCount = ItemCount;
-			var array = new TDataType[itemCount];
+			TDataType[] thatItems;
+			if (multiplicand is IInternalMatrix<TDataType, TOperationDefiner> intMultiplicand)
+				thatItems = intMultiplicand.Items;
+			else
+				thatItems = multiplicand.GetItems;
+
+			var array = new TDataType[RowCount * multiplicand.ColumnCount];
 			var zero = _opDef.Zero;
 
-			for (int i = 0; i < itemCount; i++)
-			{
-				var sum = zero;
-				for (int j = 0; j < ColumnCount; j++)
-				{
-					sum = _opDef.Add(sum, -_opDef.)
-				}
+			var columnCount = ColumnCount;
+			var rowCount = RowCount;
+			var thatColumnCount = multiplicand.ColumnCount;
 
-				array[i] = _opDef.Add(_items[i], addend._items[i]);
+			var resultPointer = 0;
+			for (int i = 0; i < rowCount; i++)
+			{
+				for (int j = 0; j < thatColumnCount; j++, resultPointer++)
+				{
+					var thisPointer = columnCount * i;
+					var thatPointer = j;
+					var sum = zero;
+					for (int k = 0; k < columnCount; k++, thisPointer++, thatPointer += thatColumnCount)
+						sum = _opDef.Add(sum, _opDef.Multiply(_items[thisPointer], thatItems[thatPointer]));
+					array[resultPointer] = sum;
+				}
 			}
 
-			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, rowCount, thatColumnCount);
 		}
 
 		public override Matrix<TDataType, TOperationDefiner> Negative()
@@ -225,5 +242,7 @@ namespace Matrixes.GenericImplementations
 		{
 			throw new NotImplementedException();
 		}
+
+		TDataType[] IInternalMatrix<TDataType, TOperationDefiner>.Items => _items;
 	}
 }

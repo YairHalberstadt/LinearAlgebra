@@ -17,7 +17,13 @@ namespace Matrixes
 
         IEnumerable<IColumnVector<TDataType, TOperationDefiner>> Columns { get; }
 
-        IRowVector<TDataType, TOperationDefiner> this[int index] { get;}
+		/// <summary>
+		/// Gets an array of all the items in the matrix.
+		/// The order is all of the first row, then all of the second row, etc.
+		/// </summary>
+	    TDataType[] GetItems { get;}
+
+	    IRowVector<TDataType, TOperationDefiner> this[int index] { get;}
 
         TDataType this[int rowIndex, int columnIndex] { get;}
 
@@ -36,6 +42,11 @@ namespace Matrixes
         bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
 
 	    bool SameSize(IMatrix<TDataType, TOperationDefiner> addend);
+	}
+
+	internal interface IInternalMatrix<TDataType, TOperationDefiner>: IMatrix<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new() :
+	{
+		TDataType[] Items { get; }
 	}
 }
 

@@ -15,7 +15,9 @@ namespace Matrixes
 
 		public abstract IEnumerable<ColumnVector<TDataType, TOperationDefiner>> Columns { get; }
 
-        public abstract RowVector<TDataType, TOperationDefiner> this[int index] { get;}
+		public abstract TDataType[] GetItems { get;}
+
+		public abstract RowVector<TDataType, TOperationDefiner> this[int index] { get;}
 
         public abstract TDataType this[int rowIndex, int columnIndex] { get;}
 
