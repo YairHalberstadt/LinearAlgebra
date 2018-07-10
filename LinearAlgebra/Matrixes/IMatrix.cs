@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes
@@ -21,7 +22,7 @@ namespace Matrixes
 		/// Gets an array of all the items in the matrix.
 		/// The order is all of the first row, then all of the second row, etc.
 		/// </summary>
-	    TDataType[] GetItems { get;}
+	    ImmutableArray<TDataType> Items { get;}
 
 	    IRowVector<TDataType, TOperationDefiner> this[int index] { get;}
 
@@ -42,11 +43,6 @@ namespace Matrixes
         bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
 
 	    bool SameSize(IMatrix<TDataType, TOperationDefiner> addend);
-	}
-
-	internal interface IInternalMatrix<TDataType, TOperationDefiner>: IMatrix<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new() :
-	{
-		TDataType[] Items { get; }
 	}
 }
 

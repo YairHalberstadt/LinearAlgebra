@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Vectors
@@ -10,6 +11,8 @@ namespace Vectors
         int Length { get; }
 
         TDataType this[int index] { get; }
+
+		ImmutableArray<TDataType> Items { get; }
 
         bool Equals(IVector<TDataType, TOperationDefiner> equand);
 

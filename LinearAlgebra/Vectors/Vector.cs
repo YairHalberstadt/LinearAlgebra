@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Vectors
@@ -12,7 +13,9 @@ namespace Vectors
 
         public abstract TDataType this[int index] { get; }
 
-        public virtual bool Equals(IVector<TDataType, TOperationDefiner> equand)
+	    public abstract ImmutableArray<TDataType> Items { get; }
+
+	    public virtual bool Equals(IVector<TDataType, TOperationDefiner> equand)
         {
             if (equand == null)
                 return false;

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes.GenericImplementations
 {
-	class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>, IInternalMatrix<TDataType, TOperationDefiner>
+	class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>
 		where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly TDataType[] _items;
@@ -37,6 +38,8 @@ namespace Matrixes.GenericImplementations
 			if (ItemCount != items.Length)
 				throw new ArgumentOutOfRangeException(nameof(items), items.Length,
 					"The number of items must be equal to the rowCount multiplied by the columnCount");
+
+			_opDef = new TOperationDefiner();
 		}
 
 		public sealed override int RowCount { get; }
@@ -81,15 +84,7 @@ namespace Matrixes.GenericImplementations
 			}
 		}
 
-		public override TDataType[] GetItems
-		{
-			get
-			{
-				var items = new TDataType[ItemCount];
-				_items.CopyTo(items, 0);
-				return items;
-			}
-		}
+		public override ImmutableArray<TDataType> Items => ImmutableArray.Create(_items);
 
 		public sealed override RowVector<TDataType, TOperationDefiner> this[int index]
 		{
@@ -163,28 +158,6 @@ namespace Matrixes.GenericImplementations
 
 		public sealed override Matrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend)
 		{
-			if (addend is IInternalMatrix<TDataType, TOperationDefiner> intAddend)
-				return Add(intAddend);
-
-			if (!SameSize(addend))
-				throw new ArgumentOutOfRangeException(nameof(addend),
-					(addend.RowCount, addend.ColumnCount), "Addend must be same size as the matrix");
-
-			var array = new TDataType[ItemCount];
-
-			var pointer = 0;
-			for (int i = 0; i < RowCount; i++)
-			{
-				for (int j = 0; j < ColumnCount; j++, pointer++)
-				{
-					array[pointer] = _opDef.Add(_items[pointer], addend[i,j]);
-				}
-			}
-			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
-		}
-
-		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Add(IInternalMatrix<TDataType, TOperationDefiner> addend)
-		{
 			if (!SameSize(addend))
 				throw new ArgumentOutOfRangeException(nameof(addend),
 					(addend), "Addend must be same size as the matrix");
@@ -203,11 +176,7 @@ namespace Matrixes.GenericImplementations
 				throw new ArgumentOutOfRangeException(nameof(multiplicand),
 					(multiplicand), "Multiplicand must have the same number of rows as the matrix has columns");
 
-			TDataType[] thatItems;
-			if (multiplicand is IInternalMatrix<TDataType, TOperationDefiner> intMultiplicand)
-				thatItems = intMultiplicand.Items;
-			else
-				thatItems = multiplicand.GetItems;
+			var thatItems = multiplicand.Items;
 
 			var array = new TDataType[RowCount * multiplicand.ColumnCount];
 			var zero = _opDef.Zero;
@@ -235,14 +204,23 @@ namespace Matrixes.GenericImplementations
 
 		public override Matrix<TDataType, TOperationDefiner> Negative()
 		{
-			throw new NotImplementedException();
+			var itemCount = ItemCount;
+			var array = new TDataType[itemCount];
+
+			for (int i = 0; i < itemCount; i++)
+				array[i] = _opDef.Negative(_items[i]);
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
 		}
 
 		public override Matrix<TDataType, TOperationDefiner> AdditiveIdentity()
 		{
-			throw new NotImplementedException();
-		}
+			var itemCount = ItemCount;
+			var array = new TDataType[itemCount];
+			var zero = _opDef.Zero;
 
-		TDataType[] IInternalMatrix<TDataType, TOperationDefiner>.Items => _items;
+			for (int i = 0; i < itemCount; i++)
+				array[i] = zero;
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array, RowCount, ColumnCount);
+		}
 	}
 }

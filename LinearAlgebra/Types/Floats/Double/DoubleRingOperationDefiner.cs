@@ -8,7 +8,7 @@ namespace Types.Floats.Double
 	/// this is because no matter the implementation of == it is either possible that ((a + b) + c) != (a + (b + c))
 	/// or it is possible that a == b, b == c, c != a.
 	/// Hence although this implementation of IRingOperationDefiner&lt;double&gt; is provided,
-	/// we reccommend you use the DecimalRingOperationDefiner instead.
+	/// we recommend you use the DecimalRingOperationDefiner instead.
 	/// </summary>
 	public class DoubleRingOperationDefiner : IRingOperationDefiner<double>
     {

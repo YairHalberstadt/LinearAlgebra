@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes
@@ -15,7 +16,7 @@ namespace Matrixes
 
 		public abstract IEnumerable<ColumnVector<TDataType, TOperationDefiner>> Columns { get; }
 
-		public abstract TDataType[] GetItems { get;}
+		public abstract ImmutableArray<TDataType> Items { get;}
 
 		public abstract RowVector<TDataType, TOperationDefiner> this[int index] { get;}
 

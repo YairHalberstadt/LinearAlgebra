@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -31,6 +32,8 @@ namespace Vectors.GenericImplementations
 
         public override TDataType this[int index] => _items[index];
 
+	    public override ImmutableArray<TDataType> Items => ImmutableArray.Create(_items);
+
 	    public override int Length { get; }
 
         public override Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
@@ -38,10 +41,12 @@ namespace Vectors.GenericImplementations
             if (addend.Length != Length)
                 throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
+	        var addendItems = addend.Items;
+
             var result = new TDataType[Length];
             
             for (int i = 0; i < Length; i++)
-                result[i] = _opDef.Add(_items[i], addend[i]);
+                result[i] = _opDef.Add(_items[i], addendItems[i]);
 
             return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
@@ -72,10 +77,12 @@ namespace Vectors.GenericImplementations
 		    if (vector.Length != Length)
 			    throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
-            var result = new TDataType[Length];
+		    var thatItems = vector.Items;
+
+			var result = new TDataType[Length];
 
 		    for (int i = 0; i < Length; i++)
-			    result[i] = func(_items[i], vector[i]);
+			    result[i] = func(_items[i], thatItems[i]);
 
 		    return new ImmutableDenseVector<TDataType, TOperationDefiner>(result);
         }
@@ -91,10 +98,12 @@ namespace Vectors.GenericImplementations
 	        if (operand.Length != Length)
 		        throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
 
+	        var operandItems = operand.Items;
+
 	        var result = _opDef.Zero;
 
 	        for (int i = 0; i < Length; i++)
-		        result = _opDef.Add(result, _opDef.Multiply(_items[i], operand[i]));
+		        result = _opDef.Add(result, _opDef.Multiply(_items[i], operandItems[i]));
 
             return result;
         }
