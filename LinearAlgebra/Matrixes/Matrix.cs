@@ -10,7 +10,7 @@ namespace Matrixes
 
 		public abstract int ColumnCount { get; }
 
-		public int ItemCount => RowCount * ColumnCount;
+		public virtual int ItemCount => checked(RowCount * ColumnCount);
 
 		public abstract IEnumerable<RowVector<TDataType, TOperationDefiner>> Rows { get; }
 

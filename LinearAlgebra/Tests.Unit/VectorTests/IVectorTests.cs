@@ -277,8 +277,6 @@ namespace Tests.Unit.VectorTests
 			TestSlice(vectors);
 			TestApplyOnTwoVectors(vectors);
 			TestApplyOnOneVectors(vectors);
-
-
 		}
 
 		private static bool AreEqual<S, T>(this IEnumerable<S> vector1, IEnumerable<S> vector2, T opDef)
