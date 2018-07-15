@@ -34,7 +34,7 @@ namespace Tests.Unit.OperationDefinerTests
         }
 
 		[Test]
-	    public void Test()
+	    public void TestRuntimeRingOperationDefiner()
 	    {
 		    var intOpDef = new RuntimeRingOperationDefiner<int>();
 		    var ints = GetRandom.GetRandomInts(10000,42,100000).ToList();
