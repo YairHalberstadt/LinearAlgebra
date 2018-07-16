@@ -3,7 +3,7 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Types.Integers.BigInt
 {
-    public class BigIntRingOperationDefiner : IRingOperationDefiner<BigInteger>
+    public struct BigIntRingOperationDefiner : IRingOperationDefiner<BigInteger>
     {
         public bool Equals(BigInteger first, BigInteger second) => first == second;
 

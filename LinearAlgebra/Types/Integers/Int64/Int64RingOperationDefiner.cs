@@ -2,7 +2,7 @@
 
 namespace Types.Integers.Int64
 {
-    public class Int64RingOperationDefiner : IRingOperationDefiner<long>
+    public struct Int64RingOperationDefiner : IRingOperationDefiner<long>
     {
         public bool Equals(long first, long second) => first == second;
 

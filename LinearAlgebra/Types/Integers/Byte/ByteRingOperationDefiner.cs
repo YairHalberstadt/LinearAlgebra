@@ -2,7 +2,7 @@
 
 namespace Types.Integers.Byte
 {
-    public class ByteRingOperationDefiner : IRingOperationDefiner<byte>
+    public struct ByteRingOperationDefiner : IRingOperationDefiner<byte>
     {
         public bool Equals(byte first, byte second) => first == second;
 

@@ -3,7 +3,7 @@ using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Types.Complex
 {
-    public class ComplexRingOperationDefiner : IRingOperationDefiner<System.Numerics.Complex>
+    public struct ComplexRingOperationDefiner : IRingOperationDefiner<System.Numerics.Complex>
     {
         public const double TOLERANCE = 0.0001;
 

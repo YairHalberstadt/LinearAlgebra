@@ -10,7 +10,7 @@ namespace Types.Floats.Float
 	/// Hence although this implementation of IRingOperationDefiner&lt;float&gt; is provided,
 	/// we recommend you use the DecimalRingOperationDefiner instead.
 	/// </summary>
-	public class FloatRingOperationDefiner : IRingOperationDefiner<float>
+	public struct FloatRingOperationDefiner : IRingOperationDefiner<float>
     {
         public const double TOLERANCE = 0.0001;
 

@@ -2,7 +2,7 @@
 
 namespace Types.Integers.Int32
 {
-    public class Int32RingOperationDefiner : IRingOperationDefiner<int>
+    public struct Int32RingOperationDefiner : IRingOperationDefiner<int>
     {
         public bool Equals(int first, int second) => first == second;
 

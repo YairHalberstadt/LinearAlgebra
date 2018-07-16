@@ -2,7 +2,7 @@
 
 namespace Types.Integers.Int16
 {
-    public class Int16RingOperationDefiner : IRingOperationDefiner<short>
+    public struct Int16RingOperationDefiner : IRingOperationDefiner<short>
     {
         public bool Equals(short first, short second) => first == second;
 

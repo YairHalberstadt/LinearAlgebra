@@ -2,7 +2,7 @@
 
 namespace Types.Floats.Decimal
 {
-    public class DecimalRingOperationDefiner : IRingOperationDefiner<decimal>
+    public struct DecimalRingOperationDefiner : IRingOperationDefiner<decimal>
     {
         public bool Equals(decimal first, decimal second) => first == second;
 
