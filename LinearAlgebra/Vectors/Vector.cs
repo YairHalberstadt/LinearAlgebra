@@ -13,8 +13,6 @@ namespace Vectors
 
         public abstract TDataType this[int index] { get; }
 
-	    public abstract ImmutableArray<TDataType> Items { get; }
-
 	    public virtual bool Equals(IVector<TDataType, TOperationDefiner> equand)
         {
             if (equand == null)

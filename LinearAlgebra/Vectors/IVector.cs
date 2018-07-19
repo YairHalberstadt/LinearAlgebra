@@ -12,8 +12,6 @@ namespace Vectors
 
         TDataType this[int index] { get; }
 
-		ImmutableArray<TDataType> Items { get; }
-
         bool Equals(IVector<TDataType, TOperationDefiner> equand);
 
         IVector<TDataType, TOperationDefiner> LeftScale(TDataType scalar);

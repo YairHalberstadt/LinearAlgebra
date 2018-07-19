@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections;
+using System.Collections.Generic;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes
@@ -15,8 +15,6 @@ namespace Matrixes
 		public abstract IEnumerable<RowVector<TDataType, TOperationDefiner>> Rows { get; }
 
 		public abstract IEnumerable<ColumnVector<TDataType, TOperationDefiner>> Columns { get; }
-
-		public abstract ImmutableArray<TDataType> Items { get;}
 
 		public abstract RowVector<TDataType, TOperationDefiner> this[int index] { get;}
 
@@ -57,5 +55,12 @@ namespace Matrixes
 		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Negative() => Negative();
 
 		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.AdditiveIdentity() => AdditiveIdentity();
+
+		public abstract IEnumerator<TDataType> GetEnumerator();
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 	}
 }

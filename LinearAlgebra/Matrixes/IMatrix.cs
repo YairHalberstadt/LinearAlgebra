@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
 
 namespace Matrixes
 {
-    public interface IMatrix<TDataType, TOperationDefiner>  where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
+	/// <The Ienumerable iterates through all of the first row
+	/// then all of the second row
+	/// etc />
+	public interface IMatrix<TDataType, TOperationDefiner> : IEnumerable<TDataType> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
     {
         int RowCount { get; }
 
@@ -17,12 +19,6 @@ namespace Matrixes
         IEnumerable<IRowVector<TDataType, TOperationDefiner>> Rows { get; }
 
         IEnumerable<IColumnVector<TDataType, TOperationDefiner>> Columns { get; }
-
-		/// <summary>
-		/// Gets an array of all the items in the matrix.
-		/// The order is all of the first row, then all of the second row, etc.
-		/// </summary>
-	    ImmutableArray<TDataType> Items { get;}
 
 	    IRowVector<TDataType, TOperationDefiner> this[int index] { get;}
 

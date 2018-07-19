@@ -11,11 +11,6 @@ namespace Matrixes.GenericImplementations
 	{
 		private readonly ImmutableDenseVector<TDataType, TOperationDefiner> _vector;
 
-		/// <summary>
-		/// Requires copying the array to guarantee Immutability.
-		/// If you know the array is Immutable, consider calling Utils.UnsafeMakeImmutable(values) first to improve performance;
-		/// </summary>
-		/// <param name="values"></param>
 		public ImmutableDenseColumnVector(IEnumerable<TDataType> values) =>
 			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
 
