@@ -41,20 +41,21 @@ namespace Tests.Utils
 			Func<IEnumerable<TDataType>, (int rows, int columns), IMatrix<TDataType, TOperationDefiner>> createMatrixFromIenumerable,
 			Func<int, TDataType> createRandomTDataTypeFromInt,
 			int numberOfMatrices,
-			(int rows, int columns)[] matrixSizes)
+			int[] matrixSizes)
 			where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 		{
 			var rand = new Random(42);
 			for (int i = 0; i < numberOfMatrices; i++)
 			{
-				var size = matrixSizes[rand.Next(0, matrixSizes.Length)];
-				TDataType[] randomArray = new TDataType[size.rows * size.columns];
-				for (int j = 0; j < size.rows * size.columns; j++)
+				var rows = matrixSizes[rand.Next(0, matrixSizes.Length)];
+			    var columns = matrixSizes[rand.Next(0, matrixSizes.Length)];
+                TDataType[] randomArray = new TDataType[rows * columns];
+				for (int j = 0; j < rows * columns; j++)
 				{
 					randomArray[j] = createRandomTDataTypeFromInt(rand.Next());
 				}
 
-				yield return createMatrixFromIenumerable(randomArray, size);
+				yield return createMatrixFromIenumerable(randomArray, (rows, columns));
 			}
 		}
 	}

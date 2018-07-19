@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Matrixes\Matrixes.csproj" />
     <ProjectReference Include="..\OperationDefiners\OperationDefiners.csproj" />
     <ProjectReference Include="..\Tests.Utils\Tests.Utils.csproj" />
     <ProjectReference Include="..\Types\Types.csproj" />

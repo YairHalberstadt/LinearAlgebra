@@ -6,7 +6,7 @@ using Utils;
 
 namespace Matrixes.GenericImplementations
 {
-	class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>
+    public class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>
 		where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly TOperationDefiner _opDef;
