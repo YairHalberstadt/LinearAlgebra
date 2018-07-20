@@ -129,7 +129,6 @@ namespace Tests.Unit.MatrixTests
 		    where T : IRingOperationDefiner<S>, new()
 	    {
 		    var opDef = new T();
-		    var zero = opDef.Zero;
 		    var rowGroups = matrices.GroupBy(x => x.RowCount).ToList();
 			var columnGroups = matrices.GroupBy(x => x.ColumnCount).ToList();
 		    foreach (var rowGroup in rowGroups)
@@ -137,15 +136,12 @@ namespace Tests.Unit.MatrixTests
 			    var columnGroup = columnGroups.FirstOrDefault(x => x.Key == rowGroup.Key);
 			    if (columnGroup == null)
 				    continue;
-			    var pairs = columnGroup.Zip(rowGroup, (x, y) => (x, y)).ToList();
-			    foreach (var pair in pairs)
-			    {
-				    pair.x.Multiply(pair.y);
-				    pair.x.Multiply(pair.y);
-					//var columns = pair.y.Columns;
-					//var expResult = pair.x.Rows.SelectMany(x => columns.Select(x.InnerProduct));
-					//Assert.True(pair.x.Multiply(pair.y).AreEqual(expResult, opDef));
-				}
+
+			    var columnMat = columnGroup.First();
+			    var rowMat = rowGroup.First();
+				var columns = rowMat.Columns;
+				var expResult = columnMat.Rows.SelectMany(x => columns.Select(x.InnerProduct));
+				Assert.True(columnMat.Multiply(rowMat).AreEqual(expResult, opDef));
 		    }
 	    }
 
