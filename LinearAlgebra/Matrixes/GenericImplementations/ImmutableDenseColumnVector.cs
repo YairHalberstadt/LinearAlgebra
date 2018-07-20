@@ -33,7 +33,7 @@ namespace Matrixes.GenericImplementations
 
 		public sealed override TDataType this[int index] => _vector[index];
 
-		public sealed override ImmutableArray<TDataType> Items => _vector.Items;
+		public ImmutableArray<TDataType> Items => _vector.Items;
 
 		public sealed override Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
 		{
@@ -87,7 +87,7 @@ namespace Matrixes.GenericImplementations
 
 		public sealed override Matrix<TDataType, TOperationDefiner> AsMatrix()
 		{
-			throw new NotImplementedException();
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(Items, 1, Length);
 		}
 	}
 }

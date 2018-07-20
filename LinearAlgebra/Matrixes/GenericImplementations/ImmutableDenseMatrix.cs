@@ -84,7 +84,7 @@ namespace Matrixes.GenericImplementations
 				var pointer = 0;
 				for (int i = 0; i < ColumnCount; pointer = ++i)
 				{
-					var array = new TDataType[ColumnCount];
+					var array = new TDataType[RowCount];
 
 					for (int j = 0; j < RowCount; j++, pointer += ColumnCount)
 					{

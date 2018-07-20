@@ -27,19 +27,20 @@ namespace Tests.Utils
             }
         }
 
-        public static IEnumerable<T> ZipMany<T>(this IEnumerable<T>[] sequences)
+        public static IEnumerable<T> ZipMany<T>(this IEnumerable<IEnumerable<T>> sequences)
         {
             if (!sequences.Any())
                 yield break;
+	        var iteratorArrays = sequences.Select(x => x.GetEnumerator()).ToArray();
             while (true)
             {
-                for (int i = 0; i < sequences.Length; i++)
+                for (int i = 0; i < iteratorArrays.Length; i++)
                 {
-                    var sequence = sequences[i];
-                    if (!sequence.Any())
+                    var iterator = iteratorArrays[i];
+                    if (!iterator.MoveNext())
                         yield break;
-                    yield return sequence.First();
-                    sequences[i] = sequence.Skip(1);
+                    yield return iterator.Current;
+	                iteratorArrays[i] = iterator;
                 }
             }
         }
