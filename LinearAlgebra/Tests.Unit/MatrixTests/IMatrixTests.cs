@@ -125,7 +125,24 @@ namespace Tests.Unit.MatrixTests
 		    }
 	    }
 
-	    public static void TestMultiply<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+	    public static void TestSubtract<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+		    where T : IRingOperationDefiner<S>, new()
+	    {
+		    var opDef = new T();
+		    var zero = opDef.Zero;
+		    var groups = matrices.GroupBy(x => (x.RowCount, x.ColumnCount)).ToList();
+		    foreach (var group in groups)
+		    {
+			    var result1 = group.Aggregate(group.First().AdditiveIdentity() ,(x, y) => x.Subtract(y));
+			    var result2 = group.Aggregate(
+				    Enumerable.Repeat(zero, group.Key.RowCount * group.Key.ColumnCount),
+				    (x, y) => x.Zip(y, (f, s) => opDef.Subtract(f, s))
+			    );
+			    Assert.True(result1.AreEqual(result2, opDef));
+		    }
+	    }
+
+		public static void TestMultiply<S, T>(IEnumerable<IMatrix<S, T>> matrices)
 		    where T : IRingOperationDefiner<S>, new()
 	    {
 		    var opDef = new T();
@@ -145,6 +162,54 @@ namespace Tests.Unit.MatrixTests
 		    }
 	    }
 
+	    public static void TestNegative<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+		    where T : IRingOperationDefiner<S>, new()
+	    {
+		    var opDef = new T();
+		    foreach (var matrix in matrices)
+		    {
+			    Assert.True(matrix.Negative().AreEqual(matrix.Select(x => opDef.Negative(x)),opDef));
+		    }
+	    }
+
+	    public static void TestAdditiveIdentity<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+		    where T : IRingOperationDefiner<S>, new()
+	    {
+		    var opDef = new T();
+		    var zero = opDef.Zero;
+		    foreach (var matrix in matrices)
+		    {
+			    var identity = matrix.AdditiveIdentity();
+			    Assert.AreEqual(identity.RowCount, matrix.RowCount);
+			    Assert.AreEqual(identity.ColumnCount, matrix.ColumnCount);
+				Assert.True(identity.All(x => opDef.Equals(x, zero)));
+		    }
+	    }
+
+	    public static void TestCanMultiply<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+		    where T : IRingOperationDefiner<S>, new()
+	    {
+		    var rowGroups = matrices.GroupBy(x => x.RowCount).ToList();
+		    var columnGroups = matrices.GroupBy(x => x.ColumnCount).ToList();
+		    foreach (var rowGroup in rowGroups)
+		    {
+			    foreach (var columnGroup in columnGroups)
+				    Assert.AreEqual(columnGroup.First().CanMultiply(rowGroup.First()), columnGroup.Key == rowGroup.Key);
+		    }
+	    }
+
+	    public static void TestSameSize<S, T>(IEnumerable<IMatrix<S, T>> matrices)
+		    where T : IRingOperationDefiner<S>, new()
+	    {
+		    var rowGroups = matrices.GroupBy(x => x.RowCount).ToList();
+		    foreach (var rowGroup in rowGroups)
+		    {
+			    var matComp = rowGroup.First();
+				foreach(var matrix in matrices)
+				    Assert.AreEqual(matrix.SameSize(matComp), matComp.RowCount == matrix.RowCount && matComp.ColumnCount == matrix.ColumnCount);
+		    }
+	    }
+
 		public static void RunIMatrixTestSuite<S, T>(IEnumerable<IMatrix<S, T>> matrices)
 		    where T : IRingOperationDefiner<S>, new()
 	    {
@@ -158,6 +223,11 @@ namespace Tests.Unit.MatrixTests
 		    TestRightScale(matrices);
 		    TestAdd(matrices);
 		    TestMultiply(matrices);
+		    TestNegative(matrices);
+		    TestAdditiveIdentity(matrices);
+		    TestCanMultiply(matrices);
+		    TestSameSize(matrices);
+		    TestSubtract(matrices);
 	    }
 
 	    private static bool AreEqual<S, T>(this IEnumerable<S> matrix1, IEnumerable<S> matrix2, T opDef)

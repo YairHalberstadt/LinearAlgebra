@@ -23,11 +23,20 @@ namespace Matrixes.GenericImplementations
 			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
 
 		/// <summary>
-		/// Fastest way to initialise a new Vector, as the array does not need to be copied.
+		/// Fastest way to initialise a new Vector from values, as the array does not need to be copied.
 		/// </summary>
 		/// <param name="values"></param>
 		public ImmutableDenseColumnVector(ImmutableArray<TDataType> values) =>
 			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
+
+		/// <summary>
+		/// Initialise a column vector from an already existing vector. Fastest constructor for this type.
+		/// </summary>
+		/// <param name="vector"></param>
+		public ImmutableDenseColumnVector(ImmutableDenseVector<TDataType, TOperationDefiner> vector) =>
+			_vector = vector;
+
+		public static implicit operator ImmutableDenseVector<TDataType, TOperationDefiner>(ImmutableDenseColumnVector<TDataType, TOperationDefiner> cv) => cv._vector;
 
 		public sealed override int Length => _vector.Length;
 
@@ -87,7 +96,7 @@ namespace Matrixes.GenericImplementations
 
 		public sealed override Matrix<TDataType, TOperationDefiner> AsMatrix()
 		{
-			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(Items, 1, Length);
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(Items, Length, 1);
 		}
 	}
 }

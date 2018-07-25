@@ -52,11 +52,42 @@ namespace Matrixes.GenericImplementations
 			_opDef = new TOperationDefiner();
 		}
 
+		public sealed override bool Equals(IMatrix<TDataType, TOperationDefiner> equand)
+		{
+			if (equand == null)
+				return false;
+			if (!SameSize(equand))
+				return false;
+			if (equand is ImmutableDenseMatrix<TDataType,TOperationDefiner> mat)
+				return Equals(mat);
+			for (int i = 0; i < RowCount; i++)
+				for (int j = 0; j < ColumnCount; j++)
+					if (!_opDef.Equals(this[i, j], equand[i, j]))
+						return false;
+			return true;
+		}
+
+		public  bool Equals(ImmutableDenseMatrix<TDataType, TOperationDefiner> equand)
+		{
+			if (equand == null)
+				return false;
+			if (!SameSize(equand))
+				return false;
+			var items = equand.Items;
+			for (int i = 0; i < ItemCount; i++)
+				if (!_opDef.Equals(Items[i], items[i]))
+					return false;
+			return true;
+		}
+
 		public sealed override int RowCount { get; }
 
 		public sealed override int ColumnCount { get; }
 
-		public sealed override int ItemCount => Items.Length;
+
+		/* Since an array cant contain more than int.MaxValue items, we can safely
+		 use an int here, which most architectures are optimised for */
+		public new int ItemCount => Items.Length;
 
 		public sealed override IEnumerable<RowVector<TDataType, TOperationDefiner>> Rows
 		{
@@ -199,6 +230,40 @@ namespace Matrixes.GenericImplementations
 			var array = new TDataType[itemCount];
 			for (int i = 0; i < itemCount; i++)
 				array[i] = _opDef.Add(Items[i], items[i]);
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
+		}
+
+		public sealed override Matrix<TDataType, TOperationDefiner> Subtract(IMatrix<TDataType, TOperationDefiner> addend)
+		{
+			if (addend is ImmutableDenseMatrix<TDataType, TOperationDefiner> mat)
+				return Subtract(mat);
+			if (!SameSize(addend))
+				throw new ArgumentOutOfRangeException(nameof(addend),
+					(addend), "Addend must be same size as the matrix");
+
+			var itemCount = ItemCount;
+			var array = new TDataType[itemCount];
+			for (int row = 0, pointer = 0; row < RowCount; row++)
+			{
+				for (int column = 0; column < ColumnCount; column++, pointer++)
+					array[pointer] = _opDef.Add(Items[pointer], _opDef.Negative(addend[row, column]));
+			}
+
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
+		}
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Subtract(
+			ImmutableDenseMatrix<TDataType, TOperationDefiner> addend)
+		{
+			if (!SameSize(addend))
+				throw new ArgumentOutOfRangeException(nameof(addend),
+					(addend), "Addend must be same size as the matrix");
+
+			var items = addend.Items;
+			var itemCount = ItemCount;
+			var array = new TDataType[itemCount];
+			for (int i = 0; i < itemCount; i++)
+				array[i] = _opDef.Add(Items[i], _opDef.Negative(items[i]));
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 

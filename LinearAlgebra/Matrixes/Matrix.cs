@@ -6,11 +6,47 @@ namespace Matrixes
 {
 	public abstract class Matrix<TDataType, TOperationDefiner> : IMatrix<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
+		public abstract bool Equals(IMatrix<TDataType, TOperationDefiner> equand);
+
+		public override bool Equals(object equand)
+		{
+			if (equand is IMatrix<TDataType, TOperationDefiner> vec)
+				return Equals(vec);
+			return false;
+		}
+
+		public override int GetHashCode()
+		{
+			int hash = 19;
+
+			for (int i = 0, j = 1, k = 1; i < 10 ;  i++, j = (j * 1733)%RowCount, k = (k * 2585) % ColumnCount )
+			{
+				hash = hash * 31 + this[j,k]?.GetHashCode() ?? 1;
+			}
+			return hash;
+		}
+
+		public static bool operator ==(Matrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first?.Equals(second) ?? second is null;
+
+		public static bool operator !=(Matrix<TDataType, TOperationDefiner> first, IMatrix<TDataType, TOperationDefiner> second) => !(first == second);
+
+		public static Matrix<TDataType, TOperationDefiner> operator +(Matrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Add(second);
+
+		public static Matrix<TDataType, TOperationDefiner> operator -(Matrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Subtract(second);
+
+		public static Matrix<TDataType, TOperationDefiner> operator -(Matrix<TDataType, TOperationDefiner> operand) => operand.Negative();
+
+		public static Matrix<TDataType, TOperationDefiner> operator *(Matrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Multiply(second);
+
 		public abstract int RowCount { get; }
 
 		public abstract int ColumnCount { get; }
 
-		public virtual int ItemCount => checked(RowCount * ColumnCount);
+		public long ItemCount => RowCount * ColumnCount;
 
 		public abstract IEnumerable<RowVector<TDataType, TOperationDefiner>> Rows { get; }
 
@@ -25,6 +61,8 @@ namespace Matrixes
 		public abstract Matrix<TDataType, TOperationDefiner> RightScale(TDataType scalar);
 
 		public abstract Matrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend);
+
+		public virtual Matrix<TDataType, TOperationDefiner> Subtract(IMatrix<TDataType, TOperationDefiner> subtrand) => Add(subtrand.Negative());
 
 		public abstract Matrix<TDataType, TOperationDefiner> Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
 
@@ -48,6 +86,9 @@ namespace Matrixes
 
 		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Add(
 			IMatrix<TDataType, TOperationDefiner> addend) => Add(addend);
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Subtract(
+			IMatrix<TDataType, TOperationDefiner> subtrand) => Subtract(subtrand);
 
 		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Multiply(
 			IMatrix<TDataType, TOperationDefiner> multiplicand) => Multiply(multiplicand);
