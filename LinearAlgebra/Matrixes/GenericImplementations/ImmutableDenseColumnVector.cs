@@ -7,96 +7,42 @@ using Vectors.GenericImplementations;
 
 namespace Matrixes.GenericImplementations
 {
-	public class ImmutableDenseColumnVector<TDataType, TOperationDefiner> : ColumnVector<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
+	public class ImmutableDenseColumnVector<TDataType, TOperationDefiner> : ImmutableDenseVector<TDataType, TOperationDefiner>, IColumnVector<TDataType, TOperationDefiner> where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly ImmutableDenseVector<TDataType, TOperationDefiner> _vector;
 
-		public ImmutableDenseColumnVector(IEnumerable<TDataType> values) =>
-			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
+		public ImmutableDenseColumnVector(IEnumerable<TDataType> values) : base(values)
+		{ }
 
 		/// <summary>
 		/// Requires copying the array to guarantee Immutability.
 		/// If you know the array is Immutable, consider calling Utils.UnsafeMakeImmutable(values) first to improve performance;
 		/// </summary>
 		/// <param name="values"></param>
-		public ImmutableDenseColumnVector(TDataType[] values) =>
-			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
+		public ImmutableDenseColumnVector(TDataType[] values) : base(values)
+		{ }
 
 		/// <summary>
 		/// Fastest way to initialise a new Vector from values, as the array does not need to be copied.
 		/// </summary>
 		/// <param name="values"></param>
-		public ImmutableDenseColumnVector(ImmutableArray<TDataType> values) =>
-			_vector = new ImmutableDenseVector<TDataType, TOperationDefiner>(values);
+		public ImmutableDenseColumnVector(ImmutableArray<TDataType> values) : base(values)
+		{ }
 
 		/// <summary>
-		/// Initialise a column vector from an already existing vector. Fastest constructor for this type.
+		/// Initialise a Column vector from an already existing vector. Fast
 		/// </summary>
 		/// <param name="vector"></param>
-		public ImmutableDenseColumnVector(ImmutableDenseVector<TDataType, TOperationDefiner> vector) =>
-			_vector = vector;
-
-		public static implicit operator ImmutableDenseVector<TDataType, TOperationDefiner>(ImmutableDenseColumnVector<TDataType, TOperationDefiner> cv) => cv._vector;
-
-		public sealed override int Length => _vector.Length;
-
-		public sealed override TDataType this[int index] => _vector[index];
-
-		public ImmutableArray<TDataType> Items => _vector.Items;
-
-		public sealed override Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
+		public ImmutableDenseColumnVector(ImmutableDenseVector<TDataType, TOperationDefiner> vector) : base(vector.Items)
 		{
-			return _vector.LeftScale(scalar);
+
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> RightScale(TDataType scalar)
-		{
-			return _vector.RightScale(scalar);
-		}
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> AsMatrix() => new ImmutableDenseMatrix<TDataType, TOperationDefiner>(Items, Length, 1);
 
-		public sealed override Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
-		{
-			return _vector.Add(addend);
-		}
+		IMatrix<TDataType, TOperationDefiner> IColumnVector<TDataType, TOperationDefiner>.AsMatrix() => AsMatrix();
 
-		public sealed override Vector<TDataType, TOperationDefiner> Negative()
-		{
-			return _vector.Negative();
-		}
-
-		public sealed override Vector<TDataType, TOperationDefiner> AdditiveIdentity()
-		{
-			return _vector.AdditiveIdentity();
-		}
-
-		public sealed override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func)
-		{
-			return _vector.Apply(func);
-		}
-
-		public sealed override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector)
-		{
-			return _vector.Apply(func, vector);
-		}
-
-		public sealed override TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand)
-		{
-			return _vector.InnerProduct(operand);
-		}
-
-		public sealed override Vector<TDataType, TOperationDefiner> Slice(int @from = 0, int to = 0)
-		{
-			return _vector.Slice(@from, to);
-		}
-
-		public sealed override IEnumerator<TDataType> GetEnumerator()
-		{
-			return _vector.GetEnumerator();
-		}
-
-		public sealed override Matrix<TDataType, TOperationDefiner> AsMatrix()
-		{
-			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(Items, Length, 1);
-		}
+		public static implicit operator ImmutableDenseMatrix<TDataType, TOperationDefiner>(ImmutableDenseColumnVector<TDataType, TOperationDefiner> vec) =>
+			vec.AsMatrix();
 	}
 }

@@ -4,7 +4,7 @@ namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperation
 {
     public class RingOperationsDefinition<T>
     {
-        public RingOperationsDefinition(Func<T, T, bool> equalsFunc, Func<T, T, T> addFunc, Func<T, T, T> multiplyFunc, T zero, Func<T, T> negativeFunc, T one)
+        public RingOperationsDefinition(Func<T, T, bool> equalsFunc, Func<T, T, T> addFunc, Func<T, T, T> multiplyFunc, T zero, Func<T, T> negativeFunc, Func<T, T, T> subtractFunc, T one)
         {
             EqualsFunc = equalsFunc;
             AddFunc = addFunc;
@@ -12,6 +12,7 @@ namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperation
             Zero = zero;
             NegativeFunc = negativeFunc;
             One = one;
+	        SubtractFunc = subtractFunc;
         }
 
         public Func<T,T, bool> EqualsFunc { get; }
@@ -24,6 +25,10 @@ namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperation
 
         public Func<T,T> NegativeFunc { get; }
 
-        public T One { get; }
+	    public Func<T, T, T> SubtractFunc { get; }
+
+		public T One { get; }
+
+
     }
 }

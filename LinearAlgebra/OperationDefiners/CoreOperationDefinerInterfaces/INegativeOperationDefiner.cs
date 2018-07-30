@@ -8,10 +8,7 @@
         /// <param name="operand"></param>
         /// <returns></returns>
         T Negative(T operand);
-    }
 
-	public static class INegativeOperationDefinerExtensions
-	{
-		public static T Subtract<T>(this INegativeOperationDefiner<T> opDef, T first, T subtrand) => opDef.Add(first, opDef.Negative(subtrand));
-	}
+	    T Subtract(T first, T second);
+    }
 }

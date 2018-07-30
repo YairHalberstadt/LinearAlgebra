@@ -16,7 +16,9 @@ namespace Matrixes
 
 		long ItemCount { get; }
 
-        IEnumerable<IRowVector<TDataType, TOperationDefiner>> Rows { get; }
+	    bool Equals(IMatrix<TDataType, TOperationDefiner> equand);
+
+		IEnumerable<IRowVector<TDataType, TOperationDefiner>> Rows { get; }
 
         IEnumerable<IColumnVector<TDataType, TOperationDefiner>> Columns { get; }
 
@@ -43,6 +45,10 @@ namespace Matrixes
 	    IMatrix<TDataType, TOperationDefiner> ApplyOnColumns(Func<IColumnVector<TDataType, TOperationDefiner>, IColumnVector<TDataType, TOperationDefiner>> func);
 
 	    IMatrix<TDataType, TOperationDefiner> ApplyOnRows(Func<IRowVector<TDataType, TOperationDefiner>, IRowVector<TDataType, TOperationDefiner>> func);
+
+	    IMatrix<TDataType, TOperationDefiner> Slice(int rowsFrom = 0, int rowsTo = -0, int columnsFrom = 0, int columnsTo = -0);
+
+	    IMatrix<TDataType, TOperationDefiner> Transpose();
 
 		bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand);
 

@@ -10,10 +10,12 @@ using Utils;
 
 namespace Vectors.GenericImplementations
 {
-	public class ImmutableDenseVector<TDataType, TOperationDefiner> : Vector<TDataType, TOperationDefiner>
+	public class ImmutableDenseVector<TDataType, TOperationDefiner> : IVector<TDataType, TOperationDefiner>
 		where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly TOperationDefiner _opDef = new TOperationDefiner();
+
+		#region constructors
 
 		public ImmutableDenseVector(IEnumerable<TDataType> items) : this(items.ToImmutableArray())
 		{
@@ -37,13 +39,114 @@ namespace Vectors.GenericImplementations
 			Items = items;
 		}
 
-		public sealed override TDataType this[int index] => Items[index];
+		#endregion
+
+		#region Equality, Hashcode, Enumerators
+
+		public bool Equals(ImmutableDenseVector<TDataType, TOperationDefiner> equand)
+		{
+			if (equand == null)
+				return false;
+
+			var opDef = new TOperationDefiner();
+
+			var length = Length;
+
+			if (equand.Length != length)
+				return false;
+
+			var equandItems = equand.Items;
+
+			for (int i = 0; i < length; i++)
+			{
+				if (!opDef.Equals(this[i], equandItems[i]))
+					return false;
+			}
+
+			return true;
+		}
+
+		public bool Equals(IVector<TDataType, TOperationDefiner> equand)
+		{
+			if (equand == null)
+				return false;
+
+			var opDef = new TOperationDefiner();
+
+			var length = Length;
+
+			if (equand.Length != length)
+				return false;
+
+			for (int i = 0; i < length; i++)
+			{
+				if (!opDef.Equals(this[i], equand[i]))
+					return false;
+			}
+
+			return true;
+		}
+
+		public sealed override bool Equals(object equand)
+		{
+			if (equand is IVector<TDataType, TOperationDefiner> vec)
+				return Equals(vec);
+			return false;
+		}
+
+		public sealed override int GetHashCode()
+		{
+			int hash = 19 * 31 + Length;
+			int step = Length / 16 + 1;
+			for (int i = 0; i < Length; i+= step)
+			{
+				hash = hash * 31 + this[i]?.GetHashCode() ?? 0;
+			}
+			return hash;
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+
+		public IEnumerator<TDataType> GetEnumerator()
+		{
+			return ((IEnumerable<TDataType>)Items).GetEnumerator();
+		}
+
+		#endregion
+
+		#region static operators
+
+		public static bool operator ==(ImmutableDenseVector<TDataType, TOperationDefiner> first,
+			IVector<TDataType, TOperationDefiner> second) => first?.Equals(second) ?? second is null;
+
+		public static bool operator !=(ImmutableDenseVector<TDataType, TOperationDefiner> first, IVector<TDataType, TOperationDefiner> second) => !(first == second);
+
+		public static ImmutableDenseVector<TDataType, TOperationDefiner> operator +(ImmutableDenseVector<TDataType, TOperationDefiner> first,
+			IVector<TDataType, TOperationDefiner> second) => first.Add(second);
+
+		public static ImmutableDenseVector<TDataType, TOperationDefiner> operator -(ImmutableDenseVector<TDataType, TOperationDefiner> first,
+			IVector<TDataType, TOperationDefiner> second) => first.Subtract(second);
+
+		public static ImmutableDenseVector<TDataType, TOperationDefiner> operator -(ImmutableDenseVector<TDataType, TOperationDefiner> operand) => operand.Negative();
+
+		#endregion
+
+		#region Properties
+
+		public TDataType this[int index] => Items[index];
 
 		public ImmutableArray<TDataType> Items { get; }
 
-		public sealed override int Length => Items.Length;
+		public int Length => Items.Length;
 
-		public sealed override Vector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
+		#endregion
+
+		#region Core Operations
+
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Add(IVector<TDataType, TOperationDefiner> addend)
 		{
 			if (addend is ImmutableDenseVector<TDataType, TOperationDefiner> vec)
 				return Add(vec);
@@ -75,7 +178,49 @@ namespace Vectors.GenericImplementations
 			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> AdditiveIdentity()
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Subtract(IVector<TDataType, TOperationDefiner> subtrand)
+		{
+			if (subtrand is ImmutableDenseVector<TDataType, TOperationDefiner> vec)
+				return Subtract(vec);
+
+			if (subtrand.Length != Length)
+				throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
+
+			var result = new TDataType[Length];
+
+			for (int i = 0; i < Length; i++)
+				result[i] = _opDef.Subtract(Items[i], subtrand[i]);
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+		}
+
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Subtract(
+			ImmutableDenseVector<TDataType, TOperationDefiner> subtrand)
+		{
+			if (subtrand.Length != Length)
+				throw new ArgumentOutOfRangeException("The Length of the two vectors must match");
+
+			var addendItems = subtrand.Items;
+
+			var result = new TDataType[Length];
+
+			for (int i = 0; i < Length; i++)
+				result[i] = _opDef.Subtract(Items[i], addendItems[i]);
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+		}
+
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Negative()
+		{
+			var result = new TDataType[Length];
+
+			for (int i = 0; i < Length; i++)
+				result[i] = _opDef.Negative(Items[i]);
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+		}
+
+		public ImmutableDenseVector<TDataType, TOperationDefiner> AdditiveIdentity()
 		{
 			var result = new TDataType[Length];
 			var zero = _opDef.Zero;
@@ -86,7 +231,7 @@ namespace Vectors.GenericImplementations
 			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func)
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func)
 		{
 			var result = new TDataType[Length];
 
@@ -96,7 +241,7 @@ namespace Vectors.GenericImplementations
 			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func,
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType, TDataType> func,
 			IVector<TDataType, TOperationDefiner> vector)
 		{
 			if (vector is ImmutableDenseVector<TDataType, TOperationDefiner> vec)
@@ -129,12 +274,27 @@ namespace Vectors.GenericImplementations
 			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override IEnumerator<TDataType> GetEnumerator()
+		public ImmutableDenseVector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
 		{
-			return ((IEnumerable<TDataType>) Items).GetEnumerator();
+			var result = new TDataType[Length];
+
+			for (int i = 0; i < Length; i++)
+				result[i] = _opDef.Multiply(scalar, Items[i]);
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand)
+		public ImmutableDenseVector<TDataType, TOperationDefiner> RightScale(TDataType scalar)
+		{
+			var result = new TDataType[Length];
+
+			for (int i = 0; i < Length; i++)
+				result[i] = _opDef.Multiply(Items[i], scalar);
+
+			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+		}
+
+		public TDataType InnerProduct(IVector<TDataType, TOperationDefiner> operand)
 		{
 			if (operand is ImmutableDenseVector<TDataType, TOperationDefiner> vec)
 				return InnerProduct(vec);
@@ -165,7 +325,12 @@ namespace Vectors.GenericImplementations
 			return result;
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0)
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Slice(int @from, int to)
+		{
+			return Slice(@from, to);
+		}
+
+		public ImmutableDenseVector<TDataType, TOperationDefiner> Slice(int from = 0, int to = -0)
 		{
 			if (Length == 0)
 				return this;
@@ -205,34 +370,50 @@ namespace Vectors.GenericImplementations
 			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> Negative()
+		#endregion
+
+		#region IVector Implementation
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.LeftScale(TDataType scalar)
 		{
-			var result = new TDataType[Length];
-
-			for (int i = 0; i < Length; i++)
-				result[i] = _opDef.Negative(Items[i]);
-
-			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+			return LeftScale(scalar);
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.RightScale(TDataType scalar)
 		{
-			var result = new TDataType[Length];
-
-			for (int i = 0; i < Length; i++)
-				result[i] = _opDef.Multiply(scalar, Items[i]);
-
-			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+			return RightScale(scalar);
 		}
 
-		public sealed override Vector<TDataType, TOperationDefiner> RightScale(TDataType scalar)
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Add(IVector<TDataType, TOperationDefiner> addend)
 		{
-			var result = new TDataType[Length];
-
-			for (int i = 0; i < Length; i++)
-				result[i] = _opDef.Multiply(Items[i], scalar);
-
-			return new ImmutableDenseVector<TDataType, TOperationDefiner>(result.UnsafeMakeImmutable());
+			return Add(addend);
 		}
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Negative()
+		{
+			return Negative();
+		}
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Subtract(IVector<TDataType, TOperationDefiner> subtrand)
+		{
+			return Subtract(subtrand);
+		}
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.AdditiveIdentity()
+		{
+			return AdditiveIdentity();
+		}
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Apply(Func<TDataType, TDataType> func)
+		{
+			return Apply(func);
+		}
+
+		IVector<TDataType, TOperationDefiner> IVector<TDataType, TOperationDefiner>.Apply(Func<TDataType, TDataType, TDataType> func, IVector<TDataType, TOperationDefiner> vector)
+		{
+			return Apply(func, vector);
+		}
+
+		#endregion
 	}
 }

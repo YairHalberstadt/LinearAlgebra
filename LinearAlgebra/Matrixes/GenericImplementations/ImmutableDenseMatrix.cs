@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using OperationDefiners.CoreOperationDefinerInterfaces;
@@ -6,10 +7,12 @@ using Utils;
 
 namespace Matrixes.GenericImplementations
 {
-    public class ImmutableDenseMatrix<TDataType, TOperationDefiner> : Matrix<TDataType, TOperationDefiner>
+    public class ImmutableDenseMatrix<TDataType, TOperationDefiner> : IMatrix<TDataType, TOperationDefiner>
 		where TOperationDefiner : IRingOperationDefiner<TDataType>, new()
 	{
 		private readonly TOperationDefiner _opDef;
+
+		#region constructors
 
 		public ImmutableDenseMatrix(IEnumerable<TDataType> items, int rowCount, int columnCount) : this(ImmutableArray.CreateRange(items),
 			rowCount, columnCount)
@@ -52,22 +55,36 @@ namespace Matrixes.GenericImplementations
 			_opDef = new TOperationDefiner();
 		}
 
-		public sealed override bool Equals(IMatrix<TDataType, TOperationDefiner> equand)
+		#endregion
+
+		#region Equality, Hashcode, Enumerators
+
+		public sealed override bool Equals(object equand)
+		{
+			if (equand is IMatrix<TDataType, TOperationDefiner> vec)
+				return Equals(vec);
+			return false;
+		}
+
+		public bool Equals(IMatrix<TDataType, TOperationDefiner> equand)
 		{
 			if (equand == null)
 				return false;
+
 			if (!SameSize(equand))
 				return false;
-			if (equand is ImmutableDenseMatrix<TDataType,TOperationDefiner> mat)
+
+			if (equand is ImmutableDenseMatrix<TDataType, TOperationDefiner> mat)
 				return Equals(mat);
+
 			for (int i = 0; i < RowCount; i++)
-				for (int j = 0; j < ColumnCount; j++)
-					if (!_opDef.Equals(this[i, j], equand[i, j]))
-						return false;
+			for (int j = 0; j < ColumnCount; j++)
+				if (!_opDef.Equals(this[i, j], equand[i, j]))
+					return false;
 			return true;
 		}
 
-		public  bool Equals(ImmutableDenseMatrix<TDataType, TOperationDefiner> equand)
+		public bool Equals(ImmutableDenseMatrix<TDataType, TOperationDefiner> equand)
 		{
 			if (equand == null)
 				return false;
@@ -80,16 +97,64 @@ namespace Matrixes.GenericImplementations
 			return true;
 		}
 
-		public sealed override int RowCount { get; }
+		public sealed override int GetHashCode()
+		{
+			int hash = 31 * (19 * 31 + RowCount) + ColumnCount;
+			int step = RowCount / 16 + 1;
+			for (int i = 0, j = 0; i < 16; i ++, j = hash % ItemCount)
+			{
+				hash = hash * 31 + this[j]?.GetHashCode() ?? 0;
+			}
+			return hash;
+		}
 
-		public sealed override int ColumnCount { get; }
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 
+		public IEnumerator<TDataType> GetEnumerator()
+		{
+			return ((IEnumerable<TDataType>)Items).GetEnumerator();
+		}
+
+		#endregion
+
+		#region static operators
+
+		public static bool operator ==(ImmutableDenseMatrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first?.Equals(second) ?? second is null;
+
+		public static bool operator !=(ImmutableDenseMatrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => !(first == second);
+
+		public static ImmutableDenseMatrix<TDataType, TOperationDefiner> operator +(ImmutableDenseMatrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Add(second);
+
+		public static ImmutableDenseMatrix<TDataType, TOperationDefiner> operator -(ImmutableDenseMatrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Subtract(second);
+
+		public static ImmutableDenseMatrix<TDataType, TOperationDefiner> operator -(ImmutableDenseMatrix<TDataType, TOperationDefiner> operand) =>
+			operand.Negative();
+
+		public static ImmutableDenseMatrix<TDataType, TOperationDefiner> operator *(ImmutableDenseMatrix<TDataType, TOperationDefiner> first,
+			IMatrix<TDataType, TOperationDefiner> second) => first.Multiply(second);
+
+		#endregion
+
+		#region Properties
+
+		public int RowCount { get; }
+
+		public int ColumnCount { get; }
 
 		/* Since an array cant contain more than int.MaxValue items, we can safely
 		 use an int here, which most architectures are optimised for */
-		public new int ItemCount => Items.Length;
+		public int ItemCount => Items.Length;
 
-		public sealed override IEnumerable<RowVector<TDataType, TOperationDefiner>> Rows
+		long IMatrix<TDataType, TOperationDefiner>.ItemCount => ItemCount;
+
+		public IEnumerable<ImmutableDenseRowVector<TDataType, TOperationDefiner>> Rows
 		{
 			get
 			{
@@ -108,7 +173,10 @@ namespace Matrixes.GenericImplementations
 			}
 		}
 
-		public sealed override IEnumerable<ColumnVector<TDataType, TOperationDefiner>> Columns
+
+		IEnumerable<IRowVector<TDataType, TOperationDefiner>> IMatrix<TDataType, TOperationDefiner>.Rows => Rows;
+
+		public IEnumerable<ImmutableDenseColumnVector<TDataType, TOperationDefiner>> Columns
 		{
 			get
 			{
@@ -127,9 +195,11 @@ namespace Matrixes.GenericImplementations
 			}
 		}
 
+		IEnumerable<IColumnVector<TDataType, TOperationDefiner>> IMatrix<TDataType, TOperationDefiner>.Columns => Columns;
+
 		public ImmutableArray<TDataType> Items { get; }
 
-		public sealed override RowVector<TDataType, TOperationDefiner> this[int index]
+		public ImmutableDenseRowVector<TDataType, TOperationDefiner> this[int index]
 		{
 			get
 			{
@@ -151,7 +221,9 @@ namespace Matrixes.GenericImplementations
 			}
 		}
 
-		public override TDataType this[int rowIndex, int columnIndex]
+		IRowVector<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.this[int index] => this[index];
+
+		public TDataType this[int rowIndex, int columnIndex]
 		{
 			get
 			{
@@ -175,7 +247,11 @@ namespace Matrixes.GenericImplementations
 			}
 		}
 
-		public override Matrix<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
+		#endregion
+
+		#region Core Operations
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> LeftScale(TDataType scalar)
 		{
 			var itemsCount = ItemCount;
 			var array = new TDataType[itemsCount];
@@ -187,7 +263,11 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public sealed override Matrix<TDataType, TOperationDefiner> RightScale(TDataType scalar)
+		public bool CanMultiply(IMatrix<TDataType, TOperationDefiner> multiplicand) => ColumnCount == multiplicand.RowCount;
+
+		public bool SameSize(IMatrix<TDataType, TOperationDefiner> operand) => ColumnCount == operand.ColumnCount && RowCount == operand.RowCount;
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> RightScale(TDataType scalar)
 		{
 			var itemsCount = ItemCount;
 			var array = new TDataType[itemsCount];
@@ -199,7 +279,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public sealed override Matrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend)
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Add(IMatrix<TDataType, TOperationDefiner> addend)
 		{
 			if (addend is ImmutableDenseMatrix<TDataType, TOperationDefiner> mat)
 				return Add(mat);
@@ -233,7 +313,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public sealed override Matrix<TDataType, TOperationDefiner> Subtract(IMatrix<TDataType, TOperationDefiner> addend)
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Subtract(IMatrix<TDataType, TOperationDefiner> addend)
 		{
 			if (addend is ImmutableDenseMatrix<TDataType, TOperationDefiner> mat)
 				return Subtract(mat);
@@ -246,7 +326,7 @@ namespace Matrixes.GenericImplementations
 			for (int row = 0, pointer = 0; row < RowCount; row++)
 			{
 				for (int column = 0; column < ColumnCount; column++, pointer++)
-					array[pointer] = _opDef.Add(Items[pointer], _opDef.Negative(addend[row, column]));
+					array[pointer] = _opDef.Subtract(Items[pointer], addend[row, column]);
 			}
 
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
@@ -267,7 +347,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public sealed override Matrix<TDataType, TOperationDefiner> Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand)
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand)
 		{
 			if (!CanMultiply(multiplicand))
 				throw new ArgumentOutOfRangeException(nameof(multiplicand),
@@ -296,7 +376,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), rowCount, thatColumnCount);
 		}
 
-		public Matrix<TDataType, TOperationDefiner> Multiply(ImmutableDenseMatrix<TDataType, TOperationDefiner> multiplicand)
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Multiply(ImmutableDenseMatrix<TDataType, TOperationDefiner> multiplicand)
 		{
 			if (!CanMultiply(multiplicand))
 				throw new ArgumentOutOfRangeException(nameof(multiplicand),
@@ -328,7 +408,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), rowCount, thatColumnCount);
 		}
 
-		public override Matrix<TDataType, TOperationDefiner> Negative()
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Negative()
 		{
 			var itemCount = ItemCount;
 			var array = new TDataType[itemCount];
@@ -338,7 +418,7 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public override Matrix<TDataType, TOperationDefiner> AdditiveIdentity()
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> AdditiveIdentity()
 		{
 			var itemCount = ItemCount;
 			var array = new TDataType[itemCount];
@@ -349,9 +429,100 @@ namespace Matrixes.GenericImplementations
 			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(array.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
 
-		public sealed override IEnumerator<TDataType> GetEnumerator()
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Apply(Func<TDataType, TDataType> func)
 		{
-			return ((IEnumerable<TDataType>) Items).GetEnumerator();
+			var results = new TDataType[ItemCount];
+			for (int i = 0; i < ItemCount; i++)
+			{
+				results[i] = func(Items[i]);
+			}
+			return new ImmutableDenseMatrix<TDataType, TOperationDefiner>(results.UnsafeMakeImmutable(), RowCount, ColumnCount);
 		}
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> ApplyOnColumns(Func<IColumnVector<TDataType, TOperationDefiner>, IColumnVector<TDataType, TOperationDefiner>> func)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> ApplyOnRows(Func<IRowVector<TDataType, TOperationDefiner>, IRowVector<TDataType, TOperationDefiner>> func)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Slice(int rowsFrom = 0, int rowsTo = 0, int columnsFrom = 0, int columnsTo = 0)
+		{
+			throw new NotImplementedException();
+		}
+
+		public ImmutableDenseMatrix<TDataType, TOperationDefiner> Transpose()
+		{
+			throw new NotImplementedException();
+		}
+
+		#endregion
+
+		#region IMatrix Implementation
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.LeftScale(TDataType scalar)
+		{
+			return LeftScale(scalar);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.RightScale(TDataType scalar)
+		{
+			return RightScale(scalar);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Add(IMatrix<TDataType, TOperationDefiner> addend)
+		{
+			return Add(addend);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Subtract(IMatrix<TDataType, TOperationDefiner> subtrand)
+		{
+			return Subtract(subtrand);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Multiply(IMatrix<TDataType, TOperationDefiner> multiplicand)
+		{
+			return Multiply(multiplicand);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Negative()
+		{
+			return Negative();
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.AdditiveIdentity()
+		{
+			return AdditiveIdentity();
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Apply(Func<TDataType, TDataType> func)
+		{
+			return Apply(func);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.ApplyOnColumns(Func<IColumnVector<TDataType, TOperationDefiner>, IColumnVector<TDataType, TOperationDefiner>> func)
+		{
+			return ApplyOnColumns(func);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.ApplyOnRows(Func<IRowVector<TDataType, TOperationDefiner>, IRowVector<TDataType, TOperationDefiner>> func)
+		{
+			return ApplyOnRows(func);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Slice(int rowsFrom, int rowsTo, int columnsFrom, int columnsTo)
+		{
+			return Slice(rowsFrom, rowsTo, columnsFrom, columnsTo);
+		}
+
+		IMatrix<TDataType, TOperationDefiner> IMatrix<TDataType, TOperationDefiner>.Transpose()
+		{
+			return Transpose();
+		}
+
+		#endregion
 	}
 }

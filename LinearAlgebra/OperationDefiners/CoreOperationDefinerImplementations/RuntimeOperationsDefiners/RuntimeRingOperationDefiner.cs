@@ -37,6 +37,8 @@ namespace OperationDefiners.CoreOperationDefinerImplementations.RuntimeOperation
 
         public T Negative(T operand) => Operations.NegativeFunc(operand);
 
-        public T One => Operations.One;
+	    public T Subtract(T first, T second) => Operations.SubtractFunc(first, second);
+
+	    public T One => Operations.One;
     }
 }
