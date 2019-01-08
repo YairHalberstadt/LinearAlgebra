@@ -39,7 +39,7 @@ namespace Vectors
         /// Note that therefore even values greater than the length of the vector are accepted.
         /// Eg:
         /// Slice(0, 0) will return the original vector
-        /// Slice(4, 8) will return the 5th, 6th, 7th 8th items.
+        /// Slice(4, 8) will return the 5th, 6th, 7th and 8th items.
         /// Slice(4, -7) will return all the elements after the 4th, up to, but not including the element 7 before the end.
         /// Slice(-7, 4) will return the last 7 elements of the vector, followed by the first 4.
         /// </summary>
